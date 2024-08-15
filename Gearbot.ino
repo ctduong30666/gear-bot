@@ -61,10 +61,12 @@ void setup() {
   doorb.write(0);
 }
 
+// Chạy chương trình
 void loop() {
   Ingame();
 }
 
+// Tiến
 void Forward(long speed) {
   dbl.setSpeed(speed);
   dbr.setSpeed(speed);
@@ -72,6 +74,7 @@ void Forward(long speed) {
   dbr.run(FORWARD);
 }
 
+// Lùi
 void Backward(long speed) {
   dbl.setSpeed(speed);
   dbr.setSpeed(speed);
@@ -79,6 +82,7 @@ void Backward(long speed) {
   dbr.run(BACKWARD);
 }
 
+// Xoay trái
 void Turn_left(long speed) {
   dbl.setSpeed(speed);
   dbr.setSpeed(speed);
@@ -86,6 +90,7 @@ void Turn_left(long speed) {
   dbr.run(FORWARD);
 }
 
+// Xoay phải
 void Turn_right(long speed) {
   dbl.setSpeed(speed);
   dbr.setSpeed(speed);
@@ -93,26 +98,31 @@ void Turn_right(long speed) {
   dbr.run(BACKWARD);
 }
 
+// Tiến bên trái
 void One_left_up(long speed) {
   dbr.setSpeed(speed);
   dbr.run(FORWARD);
 }
 
+// Tiến bên phải
 void One_right_up(long speed) {
   dbl.setSpeed(speed);
-  dbl.run(BACKWARD);
+  dbl.run(FORWARD);
 }
 
+// Lùi bên trái
 void One_left_down(long speed) {
   dbr.setSpeed(speed);
   dbr.run(BACKWARD);
 }
 
+// Lùi bên phải
 void One_right_down(long speed) {
   dbl.setSpeed(speed);
-  dbl.run(FORWARD);
+  dbl.run(BACKWARD);
 }
 
+// Không di chuyển
 void Stop() {
   dbl.setSpeed(0);
   dbr.setSpeed(0);
@@ -127,49 +137,53 @@ void Ingame() {
   int LeftY = ps2x.Analog(PSS_LY);
   int RightY = ps2x.Analog(PSS_RY);
 
-  // Di chuyển robot
+  // Lấy giá trị di chuyển
   int LY = map(LeftY, 0, 255, -255, 255);
   int RY = map(RightY, 0, 255, -255, 255);
 
-  if (LY < 10 && RY < 10) {  // Gần 0
+  // Di chuyển
+  if (LY < 10 && LY > -10 && RY < 10 && RY > -10) {  // Gần 0
     Stop();
   } 
-  else if (LY > 10 && RY < 10) {
+  else if (LY > 10 && RY > 10) {
     Forward(LY);
   } 
-  else if (LY < -10 && RY < 10) {
+  else if (LY < -10 && RY < -10) {
     Backward(-LY);
-  }
-  else if (LY < 10 && RY > 10) {
+  } 
+  else if (LY < -10 && RY > 10) {
     Turn_right(RY);
   } 
-  else if (LY < 10 && RY < -10) {
-    Turn_left(-RY);
+  else if (LY > 10 && RY < -10) {
+    Turn_left(LY);
   } 
-  else if (LY < 10 && RY == 10) {
+  else if (LY == 10 && RY > 10) {
     One_right_up(RY);
   }
-  else if (RY < 10 && LY == 10) {
+  else if (RY == 10 && LY > 10) {
     One_left_up(LY);
   }
-  else if (LY > 10 && RY == 10) {
-    One_right_down(LY);
+  else if (LY == 10 && RY < -10) {
+    One_right_down(-RY);
   }
-  else if (RY > 10 && LY == 10) {
-    One_left_down(RY);
+  else if (RY == 10 && LY > 10) {
+    One_left_down(LY);
   }
 
   // Điều khiển intake và shooter
   if (ps2x.Button(PSB_TRIANGLE)) {
     shooter.setSpeed(255);
     shooter.run(FORWARD); // Shooter hoạt động
-  } else if (ps2x.Button(PSB_SQUARE)) {
+  } 
+  if (ps2x.Button(PSB_SQUARE)) {
     intake.setSpeed(255);
     intake.run(FORWARD); // Intake hoạt động
-  } else if (ps2x.Button(PSB_CIRCLE)) {
+  } 
+  if (ps2x.Button(PSB_CIRCLE)) {
     intake.setSpeed(255);
     intake.run(BACKWARD); // Nhả bóng ra
-  } else {
+  } 
+  if (!ps2x.Button(PSB_TRIANGLE) && !ps2x.Button(PSB_SQUARE) && !ps2x.Button(PSB_CIRCLE)) {
     intake.setSpeed(0);
     shooter.setSpeed(0);
   }
@@ -181,11 +195,11 @@ void Ingame() {
   colorSensor.getRGB(&red, &green, &blue);
   
   if (red < 100 && green < 100 && blue < 100) { // Điều kiện cho màu đen
-    sorter.write(-90);
+    sorter.write(0); // Không xoay
   } else if (red > 100 && green > 100 && blue > 100) { // Điều kiện cho màu trắng
-    sorter.write(90);
+    sorter.write(90); // Xoay 90 độ
   } else {
-    sorter.write(0); // Không có màu trắng hoặc đen
+    sorter.write(45); // Xoay 45 độ
   }
 
   // Điều chỉnh góc bắn
@@ -199,12 +213,12 @@ void Ingame() {
 
   // Điều khiển các servo mở cửa thùng chứa
   if (ps2x.Button(PSB_L1)) {
-    doorw.write(90);  // Mở cửa thùng chứa
+    doorw.write(90);  // Mở cửa thùng chứa 1
   } else if (ps2x.Button(PSB_L2)) {
-    doorw.write(-90); // Đóng cửa thùng chứa
+    doorw.write(0); // Đóng cửa thùng chứa 1
   } else if (ps2x.Button(PSB_R1)) {
-    doorb.write(90);  // Mở cửa thùng chứa
+    doorb.write(90);  // Mở cửa thùng chứa 2
   } else if (ps2x.Button(PSB_R2)) {
-    doorb.write(-90); // Đóng cửa thùng chứa
+    doorb.write(0); // Đóng cửa thùng chứa 2
   }
 }
